@@ -17,7 +17,7 @@ export interface IProduct {
 }
 
 export interface IBuyer {
-    payment: TPayment;
+    payment: TPayment | null;
     email: string;
     phone: string;
     address: string;
@@ -36,4 +36,41 @@ export interface IOrder extends IBuyer {
 export interface IOrderResult {
     id: string;
     total: number;
+}
+
+export type FormErrors = Partial<Record<keyof IBuyer, string>>;
+
+export interface IProductsData {
+    products: IProduct[];
+    preview: IProduct | null; 
+    setProducts(products: IProduct[]): void;
+    getProduct(productId: string): IProduct | undefined;
+    setPreview(product: IProduct | null): void; 
+    getPreview(): IProduct | null; 
+}
+
+export interface IBasketData {
+    items: IProduct[];
+    total: number;
+    count: number;
+    add(item: IProduct): void;
+    remove(id: string): void;
+    clear(): void;
+    has(id: string): boolean;
+}
+
+export interface IUserData {
+    payment: TPayment | null;
+    address: string;
+    email: string;
+    phone: string;
+    setField(field: keyof IBuyer, value: string): void;
+    getUserData(): IBuyer;
+    clear(): void;
+    validate(): FormErrors; 
+}
+
+export interface ILarekApi {
+    getProductList(): Promise<IProductList>;
+    createOrder(order: IOrder): Promise<IOrderResult>;
 }

@@ -1,99 +1,84 @@
-import { IBuyer, TPayment } from '../types';
-import { IEvents } from './base/Events';
-
-export type FormErrors = Partial<Record<keyof IBuyer, string>>;
-
-export interface IUserData {
-    payment: TPayment | '';
-    address: string;
-    email: string;
-    phone: string;
-    formErrors: FormErrors;
-    setField(field: keyof IBuyer, value: string): void;
-    getUserData(): IBuyer;
-    clear(): void;
-    validateOrder(): boolean;
-    validateContacts(): boolean;
-}
+import { IBuyer, IUserData, FormErrors, TPayment } from '../types';
 
 export class UserData implements IUserData {
-    payment: TPayment | '' = '';
-    address: string = '';
-    email: string = '';
-    phone: string = '';
-    formErrors: FormErrors = {};
+    protected _payment: TPayment | null = null;
+    protected _address: string = '';
+    protected _email: string = '';
+    protected _phone: string = '';
+    protected _formErrors: FormErrors = {};
 
-    protected events: IEvents;
+    constructor() {}
 
-    constructor(events: IEvents) {
-        this.events = events;
+    get payment(): TPayment | null {
+        return this._payment;
+    }
+
+    get address(): string {
+        return this._address;
+    }
+
+    get email(): string {
+        return this._email;
+    }
+
+    get phone(): string {
+        return this._phone;
+    }
+
+    get formErrors(): FormErrors {
+        return this._formErrors;
     }
 
     setField(field: keyof IBuyer, value: string): void {
         if (field === 'payment') {
-            this.payment = value as TPayment;
-        } else {
-            this[field] = value;
-        }
-
-        if (field === "payment" || field === "address") {
-            this.validateOrder();
-        } else if (field === "email" || field === "phone") {
-            this.validateContacts();
+            if (value === 'card' || value === 'cash') {
+                this._payment = value;
+            } else {
+                this._payment = null;
+            }
+        } else if (field === 'address') {
+            this._address = value;
+        } else if (field === 'email') {
+            this._email = value;
+        } else if (field === 'phone') {
+            this._phone = value;
         }
     }
 
     getUserData(): IBuyer {
         return {
-            payment: this.payment as TPayment,
-            address: this.address,
-            email: this.email,
-            phone: this.phone,
+            payment: this._payment,
+            address: this._address,
+            email: this._email,
+            phone: this._phone,
         };
     }
 
-    clear(): void {
-        this.payment = '';
-        this.address = '';
-        this.email = '';
-        this.phone = '';
-        this.formErrors = {};
+   clear(): void {
+        this._payment = null;
+        this._address = '';
+        this._email = '';
+        this._phone = '';
+        this._formErrors = {};
     }
 
-    validateOrder(): boolean {
+   validate(): FormErrors {
         const errors: FormErrors = {};
 
-        if (!this.payment) {
-            errors.payment = 'Не выбран вид оплаты';
+        if (!this._payment) {
+            errors.payment = 'Необходимо выбрать способ оплаты';
         }
-        if (!this.address.trim()) {
+        if (!this._address.trim()) {
             errors.address = 'Необходимо указать адрес доставки';
         }
-
-        this.formErrors = {...this.formErrors, ...errors};
-        
-        if(this.payment) delete this.formErrors.payment;
-        if(this.address.trim()) delete this.formErrors.address;
-
-        this.events.emit('orderForm:errors', this.formErrors);
-        return Object.keys(errors).length === 0;
-    }
-
-    validateContacts(): boolean {
-        const errors: FormErrors = {};
-
-        if (!this.email.trim()) {
+        if (!this._email.trim()) {
             errors.email = 'Необходимо указать email';
         }
-        if (!this.phone.trim()) {
-            errors.phone = 'Необходимо указать номер телефона';
+        if (!this._phone.trim()) {
+            errors.phone = 'Необходимо указать телефон';
         }
-        this.formErrors = {...this.formErrors, ...errors};
 
-        if(this.email.trim()) delete this.formErrors.email;
-        if(this.phone.trim()) delete this.formErrors.phone;
-
-        this.events.emit('contactsForm:errors', this.formErrors);
-        return Object.keys(errors).length === 0;
+        this._formErrors = errors;
+        return errors;
     }
 }

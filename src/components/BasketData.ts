@@ -1,23 +1,9 @@
-import { IProduct } from "../types";
-import { IEvents } from "./base/Events";
-
-export interface IBasketData {
-    items: IProduct[];
-    total: number;
-    count: number;
-    add(item: IProduct): void;
-    remove(id: string): void;
-    clear(): void;
-    has(id: string): boolean;
-}
+import { IProduct, IBasketData } from '../types';
 
 export class BasketData implements IBasketData {
     protected _items: IProduct[] = [];
-    protected events: IEvents;
 
-    constructor(events: IEvents) {
-        this.events = events;
-    }
+    constructor() {}
 
     get items(): IProduct[] {
         return this._items;
@@ -34,33 +20,18 @@ export class BasketData implements IBasketData {
     add(item: IProduct): void {
         if (!this.has(item.id)) {
             this._items.push(item);
-            this.events.emit('basket:changed', { 
-              items: this._items, 
-              count: this.count,
-              total: this.total              
-            });
         }
-      }
+    }
 
     remove(id: string): void {
-        this._items = this._items.filter(item => item.id !== id);
-        this.events.emit('basket:changed', {
-            items: this._items,
-            count: this.count,
-            total: this.total
-        });
+        this._items = this._items.filter((item) => item.id !== id);
     }
 
     clear(): void {
         this._items = [];
-        this.events.emit('basket:changed', {
-            items: this._items,
-            count: this.count,
-            total: this.total
-        });
     }
 
     has(id: string): boolean {
-        return this._items.some(item => item.id === id);
+        return this._items.some((item) => item.id === id);
     }
 }

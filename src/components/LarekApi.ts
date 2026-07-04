@@ -1,23 +1,17 @@
-import { Api } from './base/Api';
-import { IProductList, IOrder, IOrderResult } from '../types';
-
-export interface ILarekApi {
-    getProductList(): Promise<IProductList>;
-    createOrder(order: IOrder): Promise<IOrderResult>;
-}
+import { IApi, IProductList, IOrder, IOrderResult, ILarekApi } from '../types';
 
 export class LarekApi implements ILarekApi {
-    protected _api: Api;
+    protected _api: IApi;
 
-    constructor(api: Api) {
+    constructor(api: IApi) {
         this._api = api;
     }
 
     getProductList(): Promise<IProductList> {
-        return this._api.get("/product") as Promise<IProductList>;
+        return this._api.get<IProductList>('/product');
     }
 
     createOrder(order: IOrder): Promise<IOrderResult> {
-        return this._api.post("/order", order) as Promise<IOrderResult>;
+        return this._api.post<IOrderResult>('/order', order);
     }
 }

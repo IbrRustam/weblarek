@@ -1,24 +1,13 @@
-import { IProduct } from '../types';
-import { IEvents } from './base/Events';
+import { IProduct, IProductsData } from '../types';
 
+export class ProductsData implements IProductsData {
+    protected _products: IProduct[] = [];
+    protected _preview: IProduct | null = null;
 
-export interface IProductsData {
-    products: IProduct[];
-    setProducts(products: IProduct[]): void;
-    getProduct(productId: string): IProduct | undefined;
-}
+    constructor() {}
 
-export class ProductsData implements IProductsData {    
-    protected _products: IProduct[] = [];    
-    protected events: IEvents;
-
-    constructor(events: IEvents) {
-        this.events = events;
-    }
-    
-    setProducts(products: IProduct[]): void {
-        this._products = products;        
-        this.events.emit('products:changed', { products: this._products });
+   setProducts(products: IProduct[]): void {
+        this._products = products;
     }
 
     get products(): IProduct[] {
@@ -27,5 +16,17 @@ export class ProductsData implements IProductsData {
 
     getProduct(productId: string): IProduct | undefined {
         return this._products.find((item) => item.id === productId);
+    }
+
+    get preview(): IProduct | null {
+        return this._preview;
+    }
+    
+    setPreview(product: IProduct | null): void {
+        this._preview = product;
+    }
+
+    getPreview(): IProduct | null {
+        return this._preview;
     }
 }
