@@ -1,12 +1,11 @@
-import { IBuyer, IUserData, FormErrors, TPayment } from '../types';
+import { IBuyer, IUserData, BuyerErrors, TPayment } from '../types';
 
 export class UserData implements IUserData {
     protected _payment: TPayment | null = null;
     protected _address: string = '';
     protected _email: string = '';
     protected _phone: string = '';
-    protected _formErrors: FormErrors = {};
-
+    
     constructor() {}
 
     get payment(): TPayment | null {
@@ -23,11 +22,7 @@ export class UserData implements IUserData {
 
     get phone(): string {
         return this._phone;
-    }
-
-    get formErrors(): FormErrors {
-        return this._formErrors;
-    }
+    }    
 
     setField(field: keyof IBuyer, value: string): void {
         if (field === 'payment') {
@@ -59,11 +54,10 @@ export class UserData implements IUserData {
         this._address = '';
         this._email = '';
         this._phone = '';
-        this._formErrors = {};
     }
 
-   validate(): FormErrors {
-        const errors: FormErrors = {};
+   validate(): BuyerErrors {
+        const errors: BuyerErrors = {};
 
         if (!this._payment) {
             errors.payment = 'Необходимо выбрать способ оплаты';
@@ -78,7 +72,6 @@ export class UserData implements IUserData {
             errors.phone = 'Необходимо указать телефон';
         }
 
-        this._formErrors = errors;
         return errors;
     }
 }

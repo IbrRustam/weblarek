@@ -6,7 +6,7 @@ export class ProductsData implements IProductsData {
 
     constructor() {}
 
-   setProducts(products: IProduct[]): void {
+    setProducts(products: IProduct[]): void {
         this._products = products;
     }
 
@@ -18,15 +18,11 @@ export class ProductsData implements IProductsData {
         return this._products.find((item) => item.id === productId);
     }
 
-    get preview(): IProduct | null {
+   get preview(): IProduct | null {
         return this._preview;
-    }
-    
-    setPreview(product: IProduct | null): void {
-        this._preview = product;
     }
 
-    getPreview(): IProduct | null {
-        return this._preview;
+    set preview(product: IProduct | null) {
+        this._preview = product;
     }
 }

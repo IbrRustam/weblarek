@@ -38,15 +38,13 @@ export interface IOrderResult {
     total: number;
 }
 
-export type FormErrors = Partial<Record<keyof IBuyer, string>>;
+export type BuyerErrors = Partial<Record<keyof IBuyer, string>>;
 
 export interface IProductsData {
     products: IProduct[];
     preview: IProduct | null; 
     setProducts(products: IProduct[]): void;
-    getProduct(productId: string): IProduct | undefined;
-    setPreview(product: IProduct | null): void; 
-    getPreview(): IProduct | null; 
+    getProduct(productId: string): IProduct | undefined;    
 }
 
 export interface IBasketData {
@@ -67,7 +65,7 @@ export interface IUserData {
     setField(field: keyof IBuyer, value: string): void;
     getUserData(): IBuyer;
     clear(): void;
-    validate(): FormErrors; 
+    validate(): BuyerErrors; 
 }
 
 export interface ILarekApi {
