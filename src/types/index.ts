@@ -63,7 +63,6 @@ export interface IUserData {
     email: string;
     phone: string;
     setField(field: keyof IBuyer, value: string): void;
-    getUserData(): IBuyer;
     clear(): void;
     validate(): BuyerErrors; 
 }
