@@ -31,8 +31,8 @@ export class BasketData implements IBasketData {
     }
 
     clear(): void {
-        this.events.emit('basket:changed')
         this._items = [];
+        this.events.emit('basket:changed')        
     }
 
     has(id: string): boolean {

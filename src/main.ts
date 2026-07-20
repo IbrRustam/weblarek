@@ -21,7 +21,7 @@ const api = new LarekApi(baseApi);
 
 const productsData = new ProductsData(events); 
 const basketData = new BasketData(events); 
-const userData = new UserData(events);
+const userData = new UserData(events); 
 
 const page = new Page(document.body, events); 
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events); 
@@ -38,15 +38,13 @@ const basketView = new Basket(cloneTemplate(basketTemplate), events);
 const orderForm = new OrderForm(cloneTemplate(orderTemplate), events); 
 const contactsForm = new ContactsForm(cloneTemplate(contactsTemplate), events); 
 
-const cardPreview = new PreviewCard(cloneTemplate(cardPreviewTemplate), {
-    onClick: () => events.emit('card:preview-toggle')
-});
+const cardPreview = new PreviewCard(cloneTemplate(cardPreviewTemplate), { 
+    onClick: () => events.emit('card:preview-toggle') 
+}); 
 
-const successView = new Success(cloneTemplate(successTemplate), {
-    onClick: () => events.emit('success:close')
-});
-
-let currentPreviewItem: IProduct | null = null;
+const successView = new Success(cloneTemplate(successTemplate), { 
+    onClick: () => events.emit('success:close') 
+}); 
 
 events.on('items:changed', () => { 
     page.catalog = productsData.products.map(item => { 
@@ -58,44 +56,40 @@ events.on('items:changed', () => {
 }); 
 
 events.on('card:select', (item: IProduct) => { 
-    currentPreviewItem = item;
-    events.emit('preview:changed', item);
+    productsData.preview = item; 
 }); 
 
-events.on('preview:changed', (item: IProduct) => {
-    modal.render({ 
-        content: cardPreview.render({ 
-            ...item, 
-            isOrdered: basketData.has(item.id) 
-        }) 
-    }); 
-});
+events.on('preview:changed', () => { 
+    const item = productsData.preview;
+    if (!item) return;
+    modal.render({
+        content: cardPreview.render({ ...item, isOrdered: basketData.has(item.id) })
+    });
+}); 
 
-events.on('card:preview-toggle', () => {
-    if (!currentPreviewItem) return;
-    
-    if (basketData.has(currentPreviewItem.id)) { 
-        basketData.remove(currentPreviewItem.id); 
+events.on('card:preview-toggle', () => { 
+    const item = productsData.preview; 
+    if (!item) return; 
+
+    if (basketData.has(item.id)) { 
+        basketData.remove(item.id); 
     } else { 
-        basketData.add(currentPreviewItem); 
+        basketData.add(item); 
     } 
-    modal.close();
-    events.emit('basket:changed');
-});
+    modal.close(); 
+}); 
 
 events.on('basket:open', () => { 
     modal.render({ 
-        content: basketView.render()
+        content: basketView.render() 
     }); 
-    events.emit('basket:changed');
 }); 
 
-events.on('basket:changed', () => {
+events.on('basket:changed', () => { 
     page.counter = basketData.count; 
-    
     const basketItems = basketData.items.map((item, index) => { 
         const basketCard = new BasketCard(cloneTemplate(cardBasketTemplate), { 
-            onClick: () => events.emit('basket:delete-item', item)
+            onClick: () => events.emit('basket:delete-item', item) 
         }); 
         return basketCard.render({ 
             title: item.title, 
@@ -103,17 +97,15 @@ events.on('basket:changed', () => {
             index: index + 1 
         }); 
     }); 
-
     basketView.render({ 
         items: basketItems, 
         total: basketData.total 
-    });
-});
+    }); 
+}); 
 
-events.on('basket:delete-item', (item: IProduct) => {
-    basketData.remove(item.id);
-    events.emit('basket:changed');
-});
+events.on('basket:delete-item', (item: IProduct) => { 
+    basketData.remove(item.id); 
+   }); 
 
 events.on('order:open', () => { 
     modal.render({ 
@@ -122,7 +114,6 @@ events.on('order:open', () => {
             errors: [] 
         }) 
     }); 
-    events.emit('buyer:changed');
 }); 
 
 events.on<{ field: keyof IBuyer; value: string }>('order.payment:change', (data) => { 
@@ -140,7 +131,6 @@ events.on('order:submit', () => {
             errors: [] 
         }) 
     }); 
-    events.emit('buyer:changed');
 }); 
 
 events.on<{ field: keyof IBuyer; value: string }>('contacts.email:change', (data) => { 
@@ -151,26 +141,25 @@ events.on<{ field: keyof IBuyer; value: string }>('contacts.phone:change', (data
     userData.setField(data.field, data.value); 
 }); 
 
-events.on('buyer:changed', () => {
+events.on('buyer:changed', () => { 
     const errors = userData.validate(); 
-    
-    orderForm.payment = userData.payment || '';
-    orderForm.address = userData.address || '';
+    orderForm.payment = userData.payment || ''; 
+    orderForm.address = userData.address || ''; 
     orderForm.valid = !errors.payment && !errors.address; 
     orderForm.errors = [errors.payment, errors.address].filter(Boolean) as string[]; 
-
-    contactsForm.email = userData.email || '';
-    contactsForm.phone = userData.phone || '';
+    
+    contactsForm.email = userData.email || ''; 
+    contactsForm.phone = userData.phone || ''; 
     contactsForm.valid = !errors.email && !errors.phone; 
-    contactsForm.errors = [errors.email, errors.phone].filter(Boolean) as string[];
-});
+    contactsForm.errors = [errors.email, errors.phone].filter(Boolean) as string[]; 
+}); 
 
 events.on('contacts:submit', () => { 
     const finalOrder = { 
-        payment: userData.payment,
-        address: userData.address,
-        email: userData.email,
-        phone: userData.phone,
+        payment: userData.payment, 
+        address: userData.address, 
+        email: userData.email, 
+        phone: userData.phone, 
         items: basketData.items.map(item => item.id), 
         total: basketData.total 
     }; 
@@ -186,7 +175,6 @@ events.on('contacts:submit', () => {
             }); 
             basketData.clear(); 
             userData.clear(); 
-            events.emit('basket:changed');
         }) 
         .catch((error) => { 
             console.error('Ошибка при оформлении заказа:', error); 
@@ -195,23 +183,24 @@ events.on('contacts:submit', () => {
         }); 
 }); 
 
-events.on('success:close', () => {
-    modal.close();
-});
+events.on('success:close', () => { 
+    modal.close(); 
+}); 
 
 events.on('modal:open', () => { 
     page.locked = true; 
 }); 
+
 events.on('modal:close', () => { 
     page.locked = false; 
 }); 
 
 api.getProductList() 
     .then((data) => { 
-        const preparedProducts = data.items.map(item => ({
-            ...item,
-            image: CDN_URL + item.image
-        }));
+        const preparedProducts = data.items.map(item => ({ 
+            ...item, 
+            image: CDN_URL + item.image 
+        })); 
         productsData.setProducts(preparedProducts); 
     }) 
     .catch((error) => { 
